@@ -1,0 +1,4 @@
+[
+  { "insert": "a text that's " },
+  { "insert": "bold", "attributes": { "bold": true } }
+]

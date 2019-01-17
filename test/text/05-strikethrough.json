@@ -1,0 +1,4 @@
+[
+  { "insert": "scratch " },
+  { "insert": "that", "attributes": { "strike": true } }
+]

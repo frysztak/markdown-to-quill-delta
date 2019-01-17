@@ -1,0 +1,31 @@
+{
+  "name": "remark-quill-delta",
+  "version": "0.0.1",
+  "description": "Convert MDAST to Quill Delta",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "run": "tsc -w"
+  },
+  "keywords": [
+    "remark",
+    "markdown",
+    "quill",
+    "delta"
+  ],
+  "author": "Sebastian Frysztak",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^23.3.12",
+    "@types/node": "^10.12.18",
+    "jest": "^23.6.0",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "quill-delta": "^4.1.0",
+    "remark-parse": "^6.0.3",
+    "unified": "^7.1.0",
+    "unist-util-visit": "^1.4.0"
+  }
+}
