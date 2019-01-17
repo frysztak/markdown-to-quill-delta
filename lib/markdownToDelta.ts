@@ -4,11 +4,8 @@ import Op from "quill-delta/dist/Op";
 export default function markdownToDelta(tree: any): Op[] {
   const ops: Op[] = [];
 
-  const visitChildren = (node: any, op: Op): Op[] => {
-    const { children } = node;
-    const ops = children.map((child: any) => visitNode(child, op));
-    return ops.length === 1 ? ops[0] : ops;
-  };
+  const flatten = (arr: any[]): any[] =>
+    arr.reduce((flat, next) => flat.concat(next), []);
 
   const listVisitor = (node: any) => {
     if (node.ordered && node.start !== 1) {
@@ -36,26 +33,31 @@ export default function markdownToDelta(tree: any): Op[] {
     }
   };
 
-  const visitNode = (node: any, op: Op): Op[] | Op => {
-    if (node.type === "text") {
-      op = { ...op, insert: node.value };
-    } else if (node.type === "strong") {
-      op = { ...op, attributes: { ...op.attributes, bold: true } };
-      return visitChildren(node, op);
-    } else if (node.type === "emphasis") {
-      op = { ...op, attributes: { ...op.attributes, italic: true } };
-      return visitChildren(node, op);
-    } else if (node.type === "delete") {
-      op = { ...op, attributes: { ...op.attributes, strike: true } };
-      return visitChildren(node, op);
-    }
-    return op;
-  };
-
-  const flatten = (arr: any[]): any[] =>
-    arr.reduce((flat, next) => flat.concat(next), []);
   const paragraphVisitor = (node: any) => {
     const { children } = node;
+
+    const visitNode = (node: any, op: Op): Op[] | Op => {
+      if (node.type === "text") {
+        op = { ...op, insert: node.value };
+      } else if (node.type === "strong") {
+        op = { ...op, attributes: { ...op.attributes, bold: true } };
+        return visitChildren(node, op);
+      } else if (node.type === "emphasis") {
+        op = { ...op, attributes: { ...op.attributes, italic: true } };
+        return visitChildren(node, op);
+      } else if (node.type === "delete") {
+        op = { ...op, attributes: { ...op.attributes, strike: true } };
+        return visitChildren(node, op);
+      }
+      return op;
+    };
+
+    const visitChildren = (node: any, op: Op): Op[] => {
+      const { children } = node;
+      const ops = children.map((child: any) => visitNode(child, op));
+      return ops.length === 1 ? ops[0] : ops;
+    };
+
     for (const child of children) {
       const localOps = visitNode(child, {});
 
@@ -64,7 +66,6 @@ export default function markdownToDelta(tree: any): Op[] {
       } else {
         ops.push(localOps);
       }
-      //console.log(ops);
     }
   };
 
