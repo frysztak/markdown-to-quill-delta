@@ -13,8 +13,6 @@ interface Test {
 describe("Remark-Delta Transformer", () => {
   const isDirectory = (name: string) => fs.lstatSync(name).isDirectory();
 
-  debugger;
-
   const folderPath: string = __dirname;
   const directories = fs
     .readdirSync(folderPath)
