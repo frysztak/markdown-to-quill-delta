@@ -3,10 +3,11 @@ import path from "path";
 import unified from "unified";
 import markdown from "remark-parse";
 import markdownToDelta from "../lib/markdownToDelta";
+import Op from "quill-delta/dist/Op";
 
 interface Test {
   name: string;
-  delta: any;
+  ops: Op[];
   markdown: string;
 }
 
@@ -50,7 +51,7 @@ describe("Remark-Delta Transformer", () => {
 
       tests.push({
         name: `${path.basename(directory)}/${baseFileName}`,
-        delta: JSON.parse(fs.readFileSync(jsonFilePath, "utf-8")),
+        ops: JSON.parse(fs.readFileSync(jsonFilePath, "utf-8")),
         markdown: fs.readFileSync(markdownFilePath, "utf-8")
       });
     }
@@ -61,7 +62,7 @@ describe("Remark-Delta Transformer", () => {
       const processor = unified().use(markdown);
       const ast = processor.parse(t.markdown);
       const ops = markdownToDelta(ast);
-      expect(ops).toEqual(t.delta);
+      expect(ops).toEqual(t.ops);
       //console.log(ops);
     });
   }

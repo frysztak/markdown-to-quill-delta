@@ -3,6 +3,7 @@ import Op from "quill-delta/dist/Op";
 
 export default function markdownToDelta(tree: any): Op[] {
   const ops: Op[] = [];
+  const addNewline = () => ops.push({ insert: "\n" });
 
   const flatten = (arr: any[]): any[] =>
     arr.reduce((flat, next) => flat.concat(next), []);
@@ -69,11 +70,25 @@ export default function markdownToDelta(tree: any): Op[] {
     }
   };
 
-  for (const child of tree.children) {
+  for (let idx = 0; idx < tree.children.length; idx++) {
+    const child = tree.children[idx];
+    const nextType: string =
+      idx + 1 < tree.children.length ? tree.children[idx + 1].type : "lastOne";
+
     if (child.type === "paragraph") {
       paragraphVisitor(child);
+
+      if (nextType === "paragraph") {
+        addNewline();
+        addNewline();
+      } else if (nextType === "lastOne" || nextType === "list") {
+        addNewline();
+      }
     } else if (child.type === "list") {
       listVisitor(child);
+      if (nextType === "list") {
+        addNewline();
+      }
     }
   }
 

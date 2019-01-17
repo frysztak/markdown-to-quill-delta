@@ -1,1 +1,1 @@
-[{ "insert": "all bold", "attributes": { "bold": true } }]
+[{ "insert": "all bold", "attributes": { "bold": true } }, { "insert": "\n" }]

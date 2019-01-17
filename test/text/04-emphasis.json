@@ -1,4 +1,5 @@
 [
   { "insert": "some " },
-  { "insert": "emphasis", "attributes": { "italic": true } }
+  { "insert": "emphasis", "attributes": { "italic": true } },
+  { "insert": "\n" }
 ]
