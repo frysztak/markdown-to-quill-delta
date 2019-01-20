@@ -49,6 +49,16 @@ export default function markdownToDelta(tree: any): Op[] {
       } else if (node.type === "delete") {
         op = { ...op, attributes: { ...op.attributes, strike: true } };
         return visitChildren(node, op);
+      } else if (node.type === "image") {
+        op = { insert: { image: node.url } };
+        if (node.alt) {
+          op = { ...op, attributes: { alt: node.alt } };
+        }
+      } else if (node.type === "link") {
+        const text = visitChildren(node, op);
+        op = { ...text, attributes: { ...op.attributes, link: node.url } };
+      } else {
+        throw new Error(`Unsupported note type in paragraph: ${node.type}`);
       }
       return op;
     };
@@ -89,6 +99,8 @@ export default function markdownToDelta(tree: any): Op[] {
       if (nextType === "list") {
         addNewline();
       }
+    } else {
+      throw new Error(`Unsupported child type: ${child.type}`);
     }
   }
 
