@@ -57,6 +57,11 @@ export default function markdownToDelta(tree: any): Op[] {
       } else if (node.type === "link") {
         const text = visitChildren(node, op);
         op = { ...text, attributes: { ...op.attributes, link: node.url } };
+      } else if (node.type === "inlineCode") {
+        op = {
+          insert: node.value,
+          attributes: { ...op.attributes, font: "monospace" }
+        };
       } else {
         throw new Error(`Unsupported note type in paragraph: ${node.type}`);
       }
@@ -88,7 +93,7 @@ export default function markdownToDelta(tree: any): Op[] {
     if (child.type === "paragraph") {
       paragraphVisitor(child);
 
-      if (nextType === "paragraph") {
+      if (nextType === "paragraph" || nextType === "code") {
         addNewline();
         addNewline();
       } else if (nextType === "lastOne" || nextType === "list") {
@@ -97,6 +102,13 @@ export default function markdownToDelta(tree: any): Op[] {
     } else if (child.type === "list") {
       listVisitor(child);
       if (nextType === "list") {
+        addNewline();
+      }
+    } else if (child.type === "code") {
+      ops.push({ insert: child.value });
+      ops.push({ insert: "\n", attributes: { "code-block": true } });
+
+      if (nextType === "paragraph" || nextType === "lastOne") {
         addNewline();
       }
     } else {
