@@ -18,7 +18,7 @@ export default function markdownToDelta(tree: any): Op[] {
 
   const listItemVisitor = (listNode: any) => (node: any) => {
     for (const child of node.children) {
-      visit(child, "paragraph", paragraphVisitor);
+      visit(child, "paragraph", paragraphVisitor());
 
       let listAttribute = "";
       if (listNode.ordered) {
@@ -34,7 +34,7 @@ export default function markdownToDelta(tree: any): Op[] {
     }
   };
 
-  const paragraphVisitor = (node: any) => {
+  const paragraphVisitor = (initialOp: Op = {}) => (node: any) => {
     const { children } = node;
 
     const visitNode = (node: any, op: Op): Op[] | Op => {
@@ -75,7 +75,7 @@ export default function markdownToDelta(tree: any): Op[] {
     };
 
     for (const child of children) {
-      const localOps = visitNode(child, {});
+      const localOps = visitNode(child, initialOp);
 
       if (localOps instanceof Array) {
         flatten(localOps).forEach(op => ops.push(op));
@@ -85,15 +85,33 @@ export default function markdownToDelta(tree: any): Op[] {
     }
   };
 
+  const headingVisitor = (node: any) => {
+    const mapSize = (depth: number): string => {
+      switch (depth) {
+        case 1:
+          return "huge";
+        default:
+          return "large";
+      }
+    };
+
+    const size = mapSize(node.depth);
+    paragraphVisitor({ attributes: { size: size } })(node);
+  };
+
   for (let idx = 0; idx < tree.children.length; idx++) {
     const child = tree.children[idx];
     const nextType: string =
       idx + 1 < tree.children.length ? tree.children[idx + 1].type : "lastOne";
 
     if (child.type === "paragraph") {
-      paragraphVisitor(child);
+      paragraphVisitor()(child);
 
-      if (nextType === "paragraph" || nextType === "code") {
+      if (
+        nextType === "paragraph" ||
+        nextType === "code" ||
+        nextType === "heading"
+      ) {
         addNewline();
         addNewline();
       } else if (nextType === "lastOne" || nextType === "list") {
@@ -111,6 +129,9 @@ export default function markdownToDelta(tree: any): Op[] {
       if (nextType === "paragraph" || nextType === "lastOne") {
         addNewline();
       }
+    } else if (child.type === "heading") {
+      headingVisitor(child);
+      addNewline();
     } else {
       throw new Error(`Unsupported child type: ${child.type}`);
     }
