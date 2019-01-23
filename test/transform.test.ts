@@ -63,7 +63,6 @@ describe("Remark-Delta Transformer", () => {
       const ast = processor.parse(t.markdown);
       const ops = markdownToDelta(ast);
       expect(ops).toEqual(t.ops);
-      //console.log(ops);
     });
   }
 });
