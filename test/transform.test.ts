@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import unified from "unified";
-import markdown from "remark-parse";
 import markdownToDelta from "../lib/markdownToDelta";
 import Op from "quill-delta/dist/Op";
 
@@ -59,9 +57,7 @@ describe("Remark-Delta Transformer", () => {
 
   for (const t of tests) {
     test(`Markdown to Delta: ${t.name}`, () => {
-      const processor = unified().use(markdown);
-      const ast = processor.parse(t.markdown);
-      const ops = markdownToDelta(ast);
+      const ops = markdownToDelta(t.markdown);
       expect(ops).toEqual(t.ops);
     });
   }

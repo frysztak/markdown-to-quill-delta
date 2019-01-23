@@ -1,7 +1,12 @@
 import visit from "unist-util-visit";
 import Op from "quill-delta/dist/Op";
+import unified from "unified";
+import markdown from "remark-parse";
 
-export default function markdownToDelta(tree: any): Op[] {
+export default function markdownToDelta(md: string): Op[] {
+  const processor = unified().use(markdown);
+  const tree: any = processor.parse(md);
+
   const ops: Op[] = [];
   const addNewline = () => ops.push({ insert: "\n" });
 
