@@ -1,7 +1,7 @@
 {
-  "name": "remark-quill-delta",
-  "version": "0.0.1",
-  "description": "Convert MDAST to Quill Delta",
+  "name": "markdown-to-quill-delta",
+  "version": "0.5.0",
+  "description": "Convert Markdown to Quill Delta",
   "main": "index.js",
   "scripts": {
     "test": "jest",
