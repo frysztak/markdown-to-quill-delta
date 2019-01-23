@@ -1,3 +1,6 @@
+[![NPM](https://nodei.co/npm/markdown-to-quill-delta.png)](https://nodei.co/npm/markdown-to-quill-delta/)  
+[![Build Status](https://travis-ci.org/frysztak/markdown-to-quill-delta.svg?branch=master)](https://travis-ci.org/frysztak/markdown-to-quill-delta)
+
 ## Markdown to Quill Delta converter
 
 Converts Markdown to [Quill Delta](https://quilljs.com/docs/delta/) using [remark](https://github.com/remarkjs/remark).
@@ -27,7 +30,7 @@ const ops = markdownToDelta(markdown);
 
 ## What about Delta to Markdown?
 
-not yet
+See [here](https://github.com/frysztak/quill-delta-to-markdown).
 
 ## License
 

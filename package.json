@@ -1,11 +1,16 @@
 {
   "name": "markdown-to-quill-delta",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Convert Markdown to Quill Delta",
-  "main": "index.js",
+  "main": "lib/markdownToDelta.js",
+  "types": "lib/markdownToDelta.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
   "scripts": {
     "test": "jest",
-    "run": "tsc -w"
+    "build": "tsc",
+    "build:w": "tsc -w"
   },
   "keywords": [
     "remark",

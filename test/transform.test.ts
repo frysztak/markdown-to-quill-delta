@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
-import markdownToDelta from "../lib/markdownToDelta";
+import * as fs from "fs";
+import * as path from "path";
+import markdownToDelta from "../src/markdownToDelta";
 import Op from "quill-delta/dist/Op";
 
 interface Test {
