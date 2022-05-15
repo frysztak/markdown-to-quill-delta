@@ -7,8 +7,9 @@
   "files": [
     "lib/**/*"
   ],
+  "type": "module",
   "scripts": {
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "tsc",
     "build:w": "tsc -w"
   },
@@ -21,16 +22,17 @@
   "author": "Sebastian Frysztak",
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "^23.3.12",
-    "@types/node": "^10.12.18",
-    "jest": "^23.6.0",
-    "ts-jest": "^23.10.5",
-    "typescript": "^3.2.2"
+    "@types/jest": "^27.5.1",
+    "@types/node": "^17.0.33",
+    "@types/vfile-message": "^2.0.0",
+    "jest": "^28.1.0",
+    "ts-jest": "^28.0.2",
+    "typescript": "^4.6.4"
   },
   "dependencies": {
     "quill-delta": "^4.1.0",
-    "remark-parse": "^6.0.3",
-    "unified": "^7.1.0",
-    "unist-util-visit": "^1.4.0"
+    "remark-parse": "^10.0.1",
+    "unified": "^10.1.2",
+    "unist-util-visit": "^4.1.0"
   }
 }

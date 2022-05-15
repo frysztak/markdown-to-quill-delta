@@ -1,5 +1,6 @@
-import * as fs from "fs";
-import * as path from "path";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
 import markdownToDelta from "../src/markdownToDelta";
 import Op from "quill-delta/dist/Op";
 
@@ -12,7 +13,8 @@ interface Test {
 describe("Remark-Delta Transformer", () => {
   const isDirectory = (name: string) => fs.lstatSync(name).isDirectory();
 
-  const folderPath: string = __dirname;
+  const __filename = fileURLToPath(import.meta.url);
+  const folderPath: string = path.dirname(__filename);
   const directories = fs
     .readdirSync(folderPath)
     .map((fileName: string) => path.join(folderPath, fileName))
