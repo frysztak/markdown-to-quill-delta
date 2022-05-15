@@ -2,11 +2,14 @@
   "name": "markdown-to-quill-delta",
   "version": "0.6.0",
   "description": "Convert Markdown to Quill Delta",
+  "author": "Sebastian Frysztak <sebastian.frysztak.dev>",
+  "license": "ISC",
   "main": "lib/markdownToDelta.js",
   "types": "lib/markdownToDelta.d.ts",
   "files": [
     "lib/**/*"
   ],
+  "sideEffects": false,
   "type": "module",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
@@ -19,8 +22,6 @@
     "quill",
     "delta"
   ],
-  "author": "Sebastian Frysztak",
-  "license": "ISC",
   "devDependencies": {
     "@types/jest": "^27.5.1",
     "@types/node": "^17.0.33",
