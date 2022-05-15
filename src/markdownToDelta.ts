@@ -1,10 +1,11 @@
 import {visit} from 'unist-util-visit'
 import Op from "quill-delta/dist/Op";
-import {unified} from 'unified'
+import {unified} from 'unified';
 import remarkParse from 'remark-parse'
+import remarkGfm from 'remark-gfm'
 
 export default function markdownToDelta(md: string): Op[] {
-  const processor = unified().use(remarkParse);
+  const processor = unified().use(remarkParse).use(remarkGfm);
   const tree: any = processor.parse(md);
 
   const ops: Op[] = [];
