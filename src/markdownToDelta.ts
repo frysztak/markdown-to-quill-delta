@@ -96,6 +96,10 @@ export default function markdownToDelta(md: string): Op[] {
       switch (depth) {
         case 1:
           return "huge";
+        case 2:
+          return "large";
+        case 3:
+          return "small";
         default:
           return "large";
       }

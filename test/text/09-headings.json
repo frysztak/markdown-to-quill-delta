@@ -33,6 +33,22 @@
   },
   {
     "attributes": {
+      "size": "small"
+    },
+    "insert": "This is an "
+  },
+  {
+    "attributes": {
+      "size": "small",
+      "bold": true
+    },
+    "insert": "H3"
+  },
+  {
+    "insert": "\n"
+  },
+  {
+    "attributes": {
       "size": "large"
     },
     "insert": "This is an "
@@ -42,7 +58,7 @@
       "size": "large",
       "bold": true
     },
-    "insert": "H3"
+    "insert": "H4"
   },
   {
     "insert": "\n"
