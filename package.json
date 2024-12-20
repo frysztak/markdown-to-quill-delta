@@ -1,6 +1,6 @@
 {
   "name": "markdown-to-quill-delta",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Convert Markdown to Quill Delta",
   "author": "Sebastian Frysztak <sebastian.frysztak.dev>",
   "license": "ISC",
