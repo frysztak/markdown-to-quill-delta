@@ -3,6 +3,9 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import markdownToDelta from "../src/markdownToDelta";
 import Op from "quill-delta/dist/Op";
+import { describe } from "vitest";
+import { test } from "vitest";
+import { expect } from "vitest";
 
 interface Test {
   name: string;
