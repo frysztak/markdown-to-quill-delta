@@ -1,151 +1,297 @@
-import {visit} from 'unist-util-visit'
-import Op from "quill-delta/dist/Op";
-import {unified} from 'unified';
-import remarkParse from 'remark-parse'
-import remarkGfm from 'remark-gfm'
+import type Op from 'quill-delta/dist/Op'
+import { fromMarkdown } from 'mdast-util-from-markdown'
+import { toMarkdown } from 'mdast-util-to-markdown'
+import {
+  Blockquote,
+  Code,
+  Heading,
+  Image,
+  InlineCode,
+  Link,
+  List,
+  ListItem,
+  Node,
+  Nodes,
+  Paragraph,
+  Parent,
+  Root,
+  Text,
+} from 'mdast'
+import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm'
+import { gfm } from 'micromark-extension-gfm'
+import { last } from 'lodash-es'
+import { toString } from 'mdast-util-to-string'
 
-export default function markdownToDelta(md: string): Op[] {
-  const processor = unified().use(remarkParse).use(remarkGfm);
-  const tree: any = processor.parse(md);
+type Handle = (options: {
+  node: Node
+  ancestors: Node[]
+  ops: Op[]
+  process: (node: Node, ancestors: Node[]) => void
+}) => undefined | true
 
-  const ops: Op[] = [];
-  const addNewline = () => ops.push({ insert: "\n" });
+const getNextType = (ancestors: Node[], node: Node): string => {
+  const child = last(ancestors as Parent[])?.children
+  const nextType = child?.[child.indexOf(node as any) + 1]?.type
+  return nextType ?? 'lastOne'
+}
 
-  const flatten = (arr: any[]): any[] =>
-    arr.reduce((flat, next) => flat.concat(next), []);
+const root: Handle = ({ node, process: handle, ancestors }) => {
+  if (node.type !== 'root') {
+    return
+  }
+  ;(node as Root).children.forEach((it) => handle(it, [...ancestors, node]))
+  return true
+}
 
-  const listVisitor = (node: any) => {
-    if (node.ordered && node.start !== 1) {
-      throw Error("Quill-Delta numbered lists must start from 1.");
+const paragraph: Handle = ({ node, process: handle, ancestors, ops }) => {
+  if (node.type !== 'paragraph') {
+    return
+  }
+  ;(node as Paragraph).children.forEach((it) =>
+    handle(it, [...ancestors, node]),
+  )
+  ops.push({ insert: '\n' } as Op)
+  // if (['paragraph', 'code', 'heading'].includes(getNextType(ancestors, node))) {
+  //   ops.push({ insert: '\n' } as Op)
+  // }
+  return true
+}
+
+const text: Handle = ({ node, ancestors, ops }) => {
+  if (node.type !== 'text') {
+    return
+  }
+  const attrs: Record<string, boolean> = {}
+  if (ancestors.find((it) => it.type === 'strong')) {
+    attrs.bold = true
+  }
+  if (ancestors.find((it) => it.type === 'emphasis')) {
+    attrs.italic = true
+  }
+  if (ancestors.find((it) => it.type === 'delete')) {
+    attrs.strike = true
+  }
+  if (Object.keys(attrs).length > 0) {
+    ops.push({
+      insert: (node as Text).value,
+      attributes: attrs,
+    })
+  } else {
+    ops.push({
+      insert: (node as Text).value,
+    })
+  }
+  return true
+}
+
+const strong: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (
+    node.type !== 'strong' &&
+    node.type !== 'emphasis' &&
+    node.type !== 'delete'
+  ) {
+    return
+  }
+  const attrs: Record<string, boolean> = {}
+  if (node.type === 'strong') {
+    attrs.bold = true
+  }
+  if (node.type === 'emphasis') {
+    attrs.italic = true
+  }
+  if (node.type === 'delete') {
+    attrs.strike = true
+  }
+  ;(node as Parent).children.forEach((it) => handle(it, [...ancestors, node]))
+  return true
+}
+
+const heading: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'heading') {
+    return
+  }
+  ;(node as Heading).children.forEach((it) => handle(it, [...ancestors, node]))
+  ops.push({
+    insert: '\n',
+    attributes: {
+      header: (node as Heading).depth,
+    },
+  })
+  return true
+}
+
+const list: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'list') {
+    return
+  }
+  ;(node as List).children.forEach((it) => handle(it, [...ancestors, node]))
+  // if (getNextType(ancestors, node) === 'list') {
+  //   ops.push({ insert: '\n' } as Op)
+  // }
+  return true
+}
+
+const listItem: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'listItem') {
+    return
+  }
+  const item = node as ListItem
+  item.children.forEach((it) => handle(it, [...ancestors, node]))
+  if (last(ops)?.insert === '\n' && !last(ops)?.attributes) {
+    ops.pop()
+  }
+  const list = ancestors.find((it) => it.type === 'list') as List
+  ops.push({
+    insert: '\n',
+    attributes: {
+      list:
+        item.checked === null
+          ? list.ordered
+            ? 'ordered'
+            : 'bullet'
+          : item.checked
+          ? 'checked'
+          : 'unchecked',
+    },
+  })
+  return true
+}
+
+const blockquote: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'blockquote') {
+    return
+  }
+  ;(node as Blockquote).children.forEach((it) =>
+    handle(it, [...ancestors, node]),
+  )
+  if (last(ops)?.insert === '\n' && !last(ops)?.attributes) {
+    ops.pop()
+  }
+  ops.push({
+    insert: '\n',
+    attributes: { blockquote: true },
+  })
+  return true
+}
+
+const link: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'link') {
+    return
+  }
+  ;(node as Link).children.forEach((child) => {
+    ops.push({
+      insert: (child as Text).value,
+      attributes: {
+        link: (node as Link).url,
+      },
+    })
+  })
+  return true
+}
+
+const image: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'image') {
+    return
+  }
+  ops.push({
+    insert: {
+      image: (node as Image).url,
+    },
+    attributes: {
+      alt: (node as Image).alt,
+    },
+  })
+  return true
+}
+
+const code: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'code') {
+    return
+  }
+  ops.push(
+    {
+      insert: (node as Code).value,
+    },
+    {
+      insert: '\n',
+      attributes: {
+        'code-block': true,
+      },
+    },
+  )
+  // if (['paragraph'].includes(getNextType(ancestors, node))) {
+  //   ops.push({ insert: '\n' } as Op)
+  // }
+  return true
+}
+
+const inlineCode: Handle = ({ node, ancestors, ops, process: handle }) => {
+  if (node.type !== 'inlineCode') {
+    return
+  }
+  ops.push({
+    insert: (node as InlineCode).value,
+    attributes: { code: true },
+  })
+  return true
+}
+
+const generic: Handle = ({ node, ancestors, ops }) => {
+  ops.push({
+    insert: toMarkdown(node as Nodes, {
+      extensions: [gfmToMarkdown()],
+    }),
+  })
+  return true
+}
+
+function markdownToDelta(
+  source: string | Root,
+  options: {
+    handle?: Handle
+  } = {},
+): Op[] {
+  let ast: Root
+  if (typeof source === 'string') {
+    ast = fromMarkdown(source, {
+      extensions: [gfm()],
+      mdastExtensions: [gfmFromMarkdown()],
+    })
+  } else {
+    ast = source
+  }
+
+  const ops: Op[] = []
+
+  function process(node: Node, ancestors: Node[]) {
+    const handles: Handle[] = [
+      root,
+      paragraph,
+      text,
+      strong,
+      heading,
+      list,
+      listItem,
+      blockquote,
+      link,
+      image,
+      code,
+      inlineCode,
+      generic,
+    ]
+    if (options.handle) {
+      handles.unshift(options.handle)
     }
-
-    visit(node, "listItem", listItemVisitor(node));
-  };
-
-  const listItemVisitor = (listNode: any) => (node: any) => {
-    for (const child of node.children) {
-      visit(child, "paragraph", paragraphVisitor());
-
-      let listAttribute = "";
-      if (listNode.ordered) {
-        listAttribute = "ordered";
-      } else if (node.checked) {
-        listAttribute = "checked";
-      } else if (node.checked === false) {
-        listAttribute = "unchecked";
-      } else {
-        listAttribute = "bullet";
+    for (const handle of handles) {
+      const result = handle({ node, ancestors, ops, process: process })
+      if (result) {
+        return
       }
-      ops.push({ insert: "\n", attributes: { list: listAttribute } });
-    }
-  };
-
-  const paragraphVisitor = (initialOp: Op = {}) => (node: any) => {
-    const { children } = node;
-
-    const visitNode = (node: any, op: Op): Op[] | Op => {
-      if (node.type === "text") {
-        op = { ...op, insert: node.value };
-      } else if (node.type === "strong") {
-        op = { ...op, attributes: { ...op.attributes, bold: true } };
-        return visitChildren(node, op);
-      } else if (node.type === "emphasis") {
-        op = { ...op, attributes: { ...op.attributes, italic: true } };
-        return visitChildren(node, op);
-      } else if (node.type === "delete") {
-        op = { ...op, attributes: { ...op.attributes, strike: true } };
-        return visitChildren(node, op);
-      } else if (node.type === "image") {
-        op = { insert: { image: node.url } };
-        if (node.alt) {
-          op = { ...op, attributes: { alt: node.alt } };
-        }
-      } else if (node.type === "link") {
-        const text = visitChildren(node, op);
-        op = { ...text, attributes: { ...op.attributes, link: node.url } };
-      } else if (node.type === "inlineCode") {
-        op = {
-          insert: node.value,
-          attributes: { ...op.attributes, font: "monospace" }
-        };
-      } else {
-        throw new Error(`Unsupported note type in paragraph: ${node.type}`);
-      }
-      return op;
-    };
-
-    const visitChildren = (node: any, op: Op): Op[] => {
-      const { children } = node;
-      const ops = children.map((child: any) => visitNode(child, op));
-      return ops.length === 1 ? ops[0] : ops;
-    };
-
-    for (const child of children) {
-      const localOps = visitNode(child, initialOp);
-
-      if (localOps instanceof Array) {
-        flatten(localOps).forEach(op => ops.push(op));
-      } else {
-        ops.push(localOps);
-      }
-    }
-  };
-
-  const headingVisitor = (node: any) => {
-    const mapSize = (depth: number): string => {
-      switch (depth) {
-        case 1:
-          return "huge";
-        case 2:
-          return "large";
-        case 3:
-          return "small";
-        default:
-          return "large";
-      }
-    };
-
-    const size = mapSize(node.depth);
-    paragraphVisitor({ attributes: { size: size } })(node);
-  };
-
-  for (let idx = 0; idx < tree.children.length; idx++) {
-    const child = tree.children[idx];
-    const nextType: string =
-      idx + 1 < tree.children.length ? tree.children[idx + 1].type : "lastOne";
-
-    if (child.type === "paragraph") {
-      paragraphVisitor()(child);
-
-      if (
-        nextType === "paragraph" ||
-        nextType === "code" ||
-        nextType === "heading"
-      ) {
-        addNewline();
-        addNewline();
-      } else if (nextType === "lastOne" || nextType === "list") {
-        addNewline();
-      }
-    } else if (child.type === "list") {
-      listVisitor(child);
-      if (nextType === "list") {
-        addNewline();
-      }
-    } else if (child.type === "code") {
-      ops.push({ insert: child.value });
-      ops.push({ insert: "\n", attributes: { "code-block": true } });
-
-      if (nextType === "paragraph" || nextType === "lastOne") {
-        addNewline();
-      }
-    } else if (child.type === "heading") {
-      headingVisitor(child);
-      addNewline();
-    } else {
-      throw new Error(`Unsupported child type: ${child.type}`);
     }
   }
 
-  return ops;
+  process(ast, [])
+  return ops
 }
+
+export default markdownToDelta
