@@ -22,7 +22,7 @@ import { gfm } from 'micromark-extension-gfm'
 import { last } from 'lodash-es'
 import { toString } from 'mdast-util-to-string'
 
-type Handle = (options: {
+export type Handle = (options: {
   node: Node
   ancestors: Node[]
   ops: Op[]

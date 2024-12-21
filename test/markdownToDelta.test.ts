@@ -1,5 +1,5 @@
 import { it, expect, describe } from 'vitest'
-import markdownToDelta from '../src/markdownToDelta'
+import markdownToDelta, { Handle } from '../src/markdownToDelta'
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm'
 import { toMarkdown } from 'mdast-util-to-markdown'
@@ -301,31 +301,34 @@ describe('markdownToDelta', () => {
 
 describe('custom extension', () => {
   it('should convert markdown horizontal rule to delta', () => {
-    const input = '---'
+    const input = 'a\n\n---\n\nb'
+    const thematicBreak: Handle = ({ node, ops }) => {
+      if (node.type !== 'thematicBreak') {
+        return
+      }
+      ops.push({
+        attributes: {
+          class: 'cut-off',
+        },
+        insert: {
+          'cut-off': {
+            type: '0',
+            url: 'https://i0.hdslb.com/bfs/article/0117cbba35e51b0bce5f8c2f6a838e8a087e8ee7.png',
+          },
+        },
+      })
+      return true
+    }
     const delta = markdownToDelta(input, {
-      handle: ({ node, ops }) => {
-        if (node.type === 'thematicBreak') {
-          ops.push(
-            {
-              attributes: {
-                class: 'cut-off',
-              },
-              insert: {
-                'cut-off': {
-                  type: '0',
-                  url: 'https://i0.hdslb.com/bfs/article/0117cbba35e51b0bce5f8c2f6a838e8a087e8ee7.png',
-                },
-              },
-            },
-            {
-              insert: '\n',
-            },
-          )
-          return true
-        }
-      },
+      handle: thematicBreak,
     })
     expect(delta).toEqual([
+      {
+        insert: 'a',
+      },
+      {
+        insert: '\n',
+      },
       {
         attributes: {
           class: 'cut-off',
@@ -338,11 +341,14 @@ describe('custom extension', () => {
         },
       },
       {
+        insert: 'b',
+      },
+      {
         insert: '\n',
       },
     ])
   })
-  it.only('custom markdown parser', () => {
+  it('custom markdown parser', () => {
     const input = fromMarkdown(
       '[[https://example.com]]\n[[https://www.youtube.com/watch?v=XRZ-jLOrFfk]]',
       {
