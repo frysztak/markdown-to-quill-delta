@@ -4,6 +4,10 @@ import { fromMarkdown } from 'mdast-util-from-markdown'
 import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm'
 import { toMarkdown } from 'mdast-util-to-markdown'
 import { gfm } from 'micromark-extension-gfm'
+import { selectAll } from 'unist-util-select'
+import { syntax } from 'micromark-extension-wiki-link'
+import * as wikiLink from 'mdast-util-wiki-link'
+import { Link, Node } from 'mdast'
 
 describe('markdownToDelta', () => {
   it('should convert markdown to delta', () => {
@@ -295,7 +299,7 @@ describe('markdownToDelta', () => {
   })
 })
 
-describe('extensions', () => {
+describe('custom extension', () => {
   it('should convert markdown horizontal rule to delta', () => {
     const input = '---'
     const delta = markdownToDelta(input, {
@@ -336,6 +340,68 @@ describe('extensions', () => {
       {
         insert: '\n',
       },
+    ])
+  })
+  it.only('custom markdown parser', () => {
+    const input = fromMarkdown(
+      '[[https://example.com]]\n[[https://www.youtube.com/watch?v=XRZ-jLOrFfk]]',
+      {
+        extensions: [syntax()],
+        mdastExtensions: [wikiLink.fromMarkdown()],
+      },
+    )
+    interface WikiLink extends Node {
+      value: string
+      data: {
+        alias: string
+        permalink: string
+        exists: boolean
+        hName: string
+        hProperties: Record<string, unknown>
+        hChildren: Node[]
+      }
+    }
+    const delta = markdownToDelta(input, {
+      handle: ({ node, ancestors, ops, process }) => {
+        if (node.type !== 'wikiLink') {
+          return
+        }
+        const link = node as WikiLink
+        if (!link.data.alias.startsWith('//www.youtube.com/watch?v=')) {
+          process(
+            {
+              type: 'link',
+              url: link.value + link.data.alias,
+              children: [
+                {
+                  type: 'text',
+                  value: link.value,
+                },
+              ],
+            } as Link,
+            ancestors,
+          )
+          return true
+        }
+        ops.push({
+          insert: {
+            video: link.value + link.data.alias,
+          },
+          attributes: {
+            bold: true,
+          },
+        })
+        return true
+      },
+    })
+    expect(delta).toEqual([
+      { insert: 'https', attributes: { link: 'https//example.com' } },
+      { insert: '\n' },
+      {
+        insert: { video: 'https//www.youtube.com/watch?v=XRZ-jLOrFfk' },
+        attributes: { bold: true },
+      },
+      { insert: '\n' },
     ])
   })
 })

@@ -32,6 +32,8 @@
     "@types/lodash-es": "^4.17.12",
     "@types/mdast": "^4.0.4",
     "@types/node": "^22.10.2",
+    "mdast-util-wiki-link": "^0.1.2",
+    "micromark-extension-wiki-link": "^0.0.4",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
@@ -42,6 +44,7 @@
     "mdast-util-to-markdown": "^2.1.2",
     "mdast-util-to-string": "^4.0.0",
     "micromark-extension-gfm": "^3.0.0",
-    "quill-delta": "^5.1.0"
+    "quill-delta": "^5.1.0",
+    "unist-util-select": "^5.1.0"
   }
 }
