@@ -1,0 +1,10 @@
+[
+  { "insert": "task1" },
+  { "attributes": { "list": "unchecked" }, "insert": "\n" },
+  { "insert": "task1.1" },
+  { "attributes": { "indent": 1, "list": "unchecked" }, "insert": "\n" },
+  { "insert": "task1.2" },
+  { "attributes": { "indent": 1, "list": "unchecked" }, "insert": "\n" },
+  { "insert": "task2" },
+  { "attributes": { "list": "unchecked" }, "insert": "\n" }
+]

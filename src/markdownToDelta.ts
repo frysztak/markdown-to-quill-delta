@@ -20,7 +20,6 @@ import {
 import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm'
 import { gfm } from 'micromark-extension-gfm'
 import { last } from 'lodash-es'
-import { toString } from 'mdast-util-to-string'
 
 export type Handle = (options: {
   node: Node
@@ -120,7 +119,7 @@ const heading: Handle = ({ node, ancestors, ops, process: handle }) => {
   return true
 }
 
-const list: Handle = ({ node, ancestors, ops, process: handle }) => {
+const list: Handle = ({ node, ancestors, process: handle }) => {
   if (node.type !== 'list') {
     return
   }
@@ -136,24 +135,34 @@ const listItem: Handle = ({ node, ancestors, ops, process: handle }) => {
     return
   }
   const item = node as ListItem
-  item.children.forEach((it) => handle(it, [...ancestors, node]))
+  item.children
+    .filter((it) => it.type !== 'list')
+    .forEach((it) => handle(it, [...ancestors, node]))
   if (last(ops)?.insert === '\n' && !last(ops)?.attributes) {
     ops.pop()
   }
-  const list = ancestors.find((it) => it.type === 'list') as List
-  ops.push({
+  const list = ancestors.filter((it) => it.type === 'list') as List[]
+  const lastList = last(list)
+  const op: Op = {
     insert: '\n',
     attributes: {
       list:
         item.checked === null
-          ? list.ordered
+          ? lastList?.ordered
             ? 'ordered'
             : 'bullet'
           : item.checked
           ? 'checked'
           : 'unchecked',
     },
-  })
+  }
+  if (list.length > 1) {
+    op.attributes!.indent = list.length - 1
+  }
+  ops.push(op)
+  item.children
+    .filter((it) => it.type === 'list')
+    .forEach((it) => handle(it, [...ancestors, node]))
   return true
 }
 

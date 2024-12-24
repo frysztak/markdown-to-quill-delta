@@ -34,6 +34,8 @@
     "@types/node": "^22.10.2",
     "mdast-util-wiki-link": "^0.1.2",
     "micromark-extension-wiki-link": "^0.0.4",
+    "mdast-util-to-string": "^4.0.0",
+    "unist-util-inspect": "^8.1.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
@@ -42,7 +44,6 @@
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-markdown": "^2.1.2",
-    "mdast-util-to-string": "^4.0.0",
     "micromark-extension-gfm": "^3.0.0",
     "quill-delta": "^5.1.0",
     "unist-util-select": "^5.1.0"
