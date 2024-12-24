@@ -1,66 +1,62 @@
 [
   {
-    "attributes": {
-      "size": "huge"
-    },
-    "insert": "This is an "
+      "insert": "This is an "
   },
   {
-    "attributes": {
-      "size": "huge",
-      "bold": true
-    },
-    "insert": "H1"
+      "insert": "H1",
+      "attributes": {
+          "bold": true
+      }
   },
   {
-    "insert": "\n"
+      "insert": "\n",
+      "attributes": {
+          "header": 1
+      }
   },
   {
-    "attributes": {
-      "size": "large"
-    },
-    "insert": "This is an "
+      "insert": "This is an "
   },
   {
-    "attributes": {
-      "size": "large",
-      "bold": true
-    },
-    "insert": "H2"
+      "insert": "H2",
+      "attributes": {
+          "bold": true
+      }
   },
   {
-    "insert": "\n"
+      "insert": "\n",
+      "attributes": {
+          "header": 2
+      }
   },
   {
-    "attributes": {
-      "size": "small"
-    },
-    "insert": "This is an "
+      "insert": "This is an "
   },
   {
-    "attributes": {
-      "size": "small",
-      "bold": true
-    },
-    "insert": "H3"
+      "insert": "H3",
+      "attributes": {
+          "bold": true
+      }
   },
   {
-    "insert": "\n"
+      "insert": "\n",
+      "attributes": {
+          "header": 3
+      }
   },
   {
-    "attributes": {
-      "size": "large"
-    },
-    "insert": "This is an "
+      "insert": "This is an "
   },
   {
-    "attributes": {
-      "size": "large",
-      "bold": true
-    },
-    "insert": "H4"
+      "insert": "H4",
+      "attributes": {
+          "bold": true
+      }
   },
   {
-    "insert": "\n"
+      "insert": "\n",
+      "attributes": {
+          "header": 4
+      }
   }
 ]

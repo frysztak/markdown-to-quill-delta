@@ -1,0 +1,10 @@
+[
+  { "insert": "task1" },
+  { "attributes": { "list": "bullet" }, "insert": "\n" },
+  { "insert": "task1.1" },
+  { "attributes": { "indent": 1, "list": "bullet" }, "insert": "\n" },
+  { "insert": "task1.2" },
+  { "attributes": { "indent": 1, "list": "bullet" }, "insert": "\n" },
+  { "insert": "task2" },
+  { "attributes": { "list": "bullet" }, "insert": "\n" }
+]

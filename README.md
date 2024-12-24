@@ -7,25 +7,59 @@ Converts Markdown to [Quill Delta](https://quilljs.com/docs/delta/) using [remar
 
 ## Status
 
-| Feature      | Status |
-| ------------ | ------ |
-| Paragraphs   | ✅     |
-| Headers      | ✅     |
-| Text styling | ✅     |
-| Code blocks  | ✅     |
-| Quote blocks | ❌     |
-| Lists        | ✅     |
-| Checkboxes   | ✅     |
-| Links        | ✅¹    |
-| Images       | ✅     |
+| Feature          | Status |
+| ---------------- | ------ |
+| Paragraphs       | ✅     |
+| Headers          | ✅     |
+| Text             | ✅     |
+| Strong           | ✅     |
+| Emphasis         | ✅     |
+| Delete           | ✅     |
+| Code blocks      | ✅     |
+| Quote blocks     | ✅     |
+| Lists            | ✅     |
+| Checkboxes       | ✅     |
+| Links            | ✅¹    |
+| Images           | ✅     |
+| Custom Extension | ✅     |
 
 ¹: reference-style links are not yet supported
 
 ## Usage
 
-```typescript
-import markdownToDelta from "markdown-to-quill-delta";
-const ops = markdownToDelta(markdown);
+```ts
+import markdownToDelta from 'markdown-to-quill-delta'
+const ops = markdownToDelta(markdown)
+```
+
+Custom Extension:
+
+```ts
+import markdownToDelta from 'markdown-to-quill-delta'
+const input = '---'
+const ops = markdownToDelta(input, {
+  handle: ({ node, ops }) => {
+    if (node.type === 'thematicBreak') {
+      ops.push(
+        {
+          attributes: {
+            class: 'cut-off',
+          },
+          insert: {
+            'cut-off': {
+              type: '0',
+              url: 'https://i0.hdslb.com/bfs/article/0117cbba35e51b0bce5f8c2f6a838e8a087e8ee7.png',
+            },
+          },
+        },
+        {
+          insert: '\n',
+        },
+      )
+      return true
+    }
+  },
+})
 ```
 
 ## What about Delta to Markdown?
