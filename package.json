@@ -6,13 +6,19 @@
   "license": "ISC",
   "main": "lib/markdownToDelta.js",
   "types": "lib/markdownToDelta.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/markdownToDelta.d.ts",
+      "import": "./lib/markdownToDelta.js"
+    }
+  },
   "files": [
     "lib/**/*"
   ],
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "vitest run",
     "build": "tsc",
     "build:w": "tsc -w"
   },
@@ -23,18 +29,23 @@
     "delta"
   ],
   "devDependencies": {
-    "@types/jest": "^27.5.1",
-    "@types/node": "^17.0.33",
-    "@types/vfile-message": "^2.0.0",
-    "jest": "^28.1.0",
-    "ts-jest": "^28.0.2",
-    "typescript": "^4.6.4"
+    "@types/lodash-es": "^4.17.12",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^22.10.2",
+    "mdast-util-wiki-link": "^0.1.2",
+    "micromark-extension-wiki-link": "^0.0.4",
+    "mdast-util-to-string": "^4.0.0",
+    "unist-util-inspect": "^8.1.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "dependencies": {
-    "quill-delta": "^4.1.0",
-    "remark-gfm": "^3.0.1",
-    "remark-parse": "^10.0.1",
-    "unified": "^10.1.2",
-    "unist-util-visit": "^4.1.0"
+    "lodash-es": "^4.17.21",
+    "mdast-util-from-markdown": "^2.0.2",
+    "mdast-util-gfm": "^3.0.0",
+    "mdast-util-to-markdown": "^2.1.2",
+    "micromark-extension-gfm": "^3.0.0",
+    "quill-delta": "^5.1.0",
+    "unist-util-select": "^5.1.0"
   }
 }
