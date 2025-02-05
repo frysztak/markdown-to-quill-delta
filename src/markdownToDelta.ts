@@ -21,12 +21,18 @@ import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm'
 import { gfm } from 'micromark-extension-gfm'
 import { last } from 'lodash-es'
 
-export type Handle = (options: {
+export type Handle = (ctx: {
   node: Node
   ancestors: Node[]
   ops: Op[]
   process: (node: Node, ancestors: Node[]) => void
 }) => undefined | true
+
+const getPreviousType = (ancestors: Node[], node: Node): string => {
+  const child = last(ancestors as Parent[])?.children
+  const previousType = child?.[child.indexOf(node as any) - 1]?.type
+  return previousType ?? 'firstOne'
+}
 
 const getNextType = (ancestors: Node[], node: Node): string => {
   const child = last(ancestors as Parent[])?.children
@@ -38,7 +44,7 @@ const root: Handle = ({ node, process: handle, ancestors }) => {
   if (node.type !== 'root') {
     return
   }
-  ;(node as Root).children.forEach((it) => handle(it, [...ancestors, node]))
+  ; (node as Root).children.forEach((it) => handle(it, [...ancestors, node]))
   return true
 }
 
@@ -46,7 +52,7 @@ const paragraph: Handle = ({ node, process: handle, ancestors, ops }) => {
   if (node.type !== 'paragraph') {
     return
   }
-  ;(node as Paragraph).children.forEach((it) =>
+  ; (node as Paragraph).children.forEach((it) =>
     handle(it, [...ancestors, node]),
   )
   ops.push({ insert: '\n' } as Op)
@@ -101,7 +107,7 @@ const strong: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type === 'delete') {
     attrs.strike = true
   }
-  ;(node as Parent).children.forEach((it) => handle(it, [...ancestors, node]))
+  ; (node as Parent).children.forEach((it) => handle(it, [...ancestors, node]))
   return true
 }
 
@@ -109,7 +115,7 @@ const heading: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type !== 'heading') {
     return
   }
-  ;(node as Heading).children.forEach((it) => handle(it, [...ancestors, node]))
+  ; (node as Heading).children.forEach((it) => handle(it, [...ancestors, node]))
   ops.push({
     insert: '\n',
     attributes: {
@@ -123,7 +129,7 @@ const list: Handle = ({ node, ancestors, process: handle }) => {
   if (node.type !== 'list') {
     return
   }
-  ;(node as List).children.forEach((it) => handle(it, [...ancestors, node]))
+  ; (node as List).children.forEach((it) => handle(it, [...ancestors, node]))
   // if (getNextType(ancestors, node) === 'list') {
   //   ops.push({ insert: '\n' } as Op)
   // }
@@ -152,8 +158,8 @@ const listItem: Handle = ({ node, ancestors, ops, process: handle }) => {
             ? 'ordered'
             : 'bullet'
           : item.checked
-          ? 'checked'
-          : 'unchecked',
+            ? 'checked'
+            : 'unchecked',
     },
   }
   if (list.length > 1) {
@@ -170,7 +176,7 @@ const blockquote: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type !== 'blockquote') {
     return
   }
-  ;(node as Blockquote).children.forEach((it) =>
+  ; (node as Blockquote).children.forEach((it) =>
     handle(it, [...ancestors, node]),
   )
   if (last(ops)?.insert === '\n' && !last(ops)?.attributes) {
@@ -187,7 +193,7 @@ const link: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type !== 'link') {
     return
   }
-  ;(node as Link).children.forEach((child) => {
+  ; (node as Link).children.forEach((child) => {
     ops.push({
       insert: (child as Text).value,
       attributes: {
@@ -254,6 +260,26 @@ const generic: Handle = ({ node, ancestors, ops }) => {
   return true
 }
 
+const breaking: Handle = ({ node, ancestors, ops, process }) => {
+  if (node.type !== 'break') {
+    return
+  }
+  const prevType = getPreviousType(ancestors, node)
+  const nextType = getNextType(ancestors, node)
+  if (prevType !== 'text' || nextType !== 'text') {
+    ops.push({ insert: '\n' })
+    return true
+  }
+  const old = ops[ops.length - 1]
+  const child = last(ancestors as Parent[])!.children
+  const nextNode = child[child.indexOf(node as any) + 1] as Text
+  ops[ops.length - 1] = {
+    insert: old.insert + '\n' + nextNode.value,
+  }
+  child.splice(child.indexOf(nextNode), 1)
+  return true
+}
+
 function markdownToDelta(
   source: string | Root,
   options: {
@@ -286,6 +312,7 @@ function markdownToDelta(
       image,
       code,
       inlineCode,
+      breaking,
       generic,
     ]
     if (options.handle) {

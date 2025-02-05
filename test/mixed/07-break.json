@@ -1,0 +1,29 @@
+[
+  {
+    "attributes": {
+      "bold": true
+    },
+    "insert": "Bold Text"
+  },
+  {
+    "insert": "\n"
+  },
+  {
+    "attributes": {
+      "italic": true
+    },
+    "insert": "Italic Text"
+  },
+  {
+    "insert": "\n"
+  },
+  {
+    "attributes": {
+      "strike": true
+    },
+    "insert": "Strikethrough"
+  },
+  {
+    "insert": "\n"
+  }
+]
