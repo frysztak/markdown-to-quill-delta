@@ -44,7 +44,7 @@ const root: Handle = ({ node, process: handle, ancestors }) => {
   if (node.type !== 'root') {
     return
   }
-  ; (node as Root).children.forEach((it) => handle(it, [...ancestors, node]))
+  ;(node as Root).children.forEach((it) => handle(it, [...ancestors, node]))
   return true
 }
 
@@ -52,7 +52,7 @@ const paragraph: Handle = ({ node, process: handle, ancestors, ops }) => {
   if (node.type !== 'paragraph') {
     return
   }
-  ; (node as Paragraph).children.forEach((it) =>
+  ;(node as Paragraph).children.forEach((it) =>
     handle(it, [...ancestors, node]),
   )
   ops.push({ insert: '\n' } as Op)
@@ -107,7 +107,7 @@ const strong: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type === 'delete') {
     attrs.strike = true
   }
-  ; (node as Parent).children.forEach((it) => handle(it, [...ancestors, node]))
+  ;(node as Parent).children.forEach((it) => handle(it, [...ancestors, node]))
   return true
 }
 
@@ -115,7 +115,7 @@ const heading: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type !== 'heading') {
     return
   }
-  ; (node as Heading).children.forEach((it) => handle(it, [...ancestors, node]))
+  ;(node as Heading).children.forEach((it) => handle(it, [...ancestors, node]))
   ops.push({
     insert: '\n',
     attributes: {
@@ -129,7 +129,7 @@ const list: Handle = ({ node, ancestors, process: handle }) => {
   if (node.type !== 'list') {
     return
   }
-  ; (node as List).children.forEach((it) => handle(it, [...ancestors, node]))
+  ;(node as List).children.forEach((it) => handle(it, [...ancestors, node]))
   // if (getNextType(ancestors, node) === 'list') {
   //   ops.push({ insert: '\n' } as Op)
   // }
@@ -176,7 +176,7 @@ const blockquote: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type !== 'blockquote') {
     return
   }
-  ; (node as Blockquote).children.forEach((it) =>
+  ;(node as Blockquote).children.forEach((it) =>
     handle(it, [...ancestors, node]),
   )
   if (last(ops)?.insert === '\n' && !last(ops)?.attributes) {
@@ -193,7 +193,7 @@ const link: Handle = ({ node, ancestors, ops, process: handle }) => {
   if (node.type !== 'link') {
     return
   }
-  ; (node as Link).children.forEach((child) => {
+  ;(node as Link).children.forEach((child) => {
     ops.push({
       insert: (child as Text).value,
       attributes: {
