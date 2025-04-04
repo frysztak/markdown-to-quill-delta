@@ -20,7 +20,9 @@
   "scripts": {
     "test": "vitest run",
     "build": "tsc",
-    "build:w": "tsc -w"
+    "build:w": "tsc -w",
+    "format": "prettier --write src/ test/",
+    "postinstall": "npx simple-git-hooks"
   },
   "keywords": [
     "remark",
@@ -32,11 +34,14 @@
     "@types/lodash-es": "^4.17.12",
     "@types/mdast": "^4.0.4",
     "@types/node": "^22.10.2",
+    "lint-staged": "^15.5.0",
+    "mdast-util-to-string": "^4.0.0",
     "mdast-util-wiki-link": "^0.1.2",
     "micromark-extension-wiki-link": "^0.0.4",
-    "mdast-util-to-string": "^4.0.0",
-    "unist-util-inspect": "^8.1.0",
+    "prettier": "^3.5.3",
+    "simple-git-hooks": "^2.12.1",
     "typescript": "^5.7.2",
+    "unist-util-inspect": "^8.1.0",
     "vitest": "^2.1.8"
   },
   "dependencies": {
@@ -47,5 +52,29 @@
     "micromark-extension-gfm": "^3.0.0",
     "quill-delta": "^5.1.0",
     "unist-util-select": "^5.1.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,css,md,json}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "printWidth": 80,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "arrowParens": "always",
+    "endOfLine": "lf"
+  },
+  "packageManager": "pnpm@10.5.2+sha512.da9dc28cd3ff40d0592188235ab25d3202add8a207afbedc682220e4a0029ffbff4562102b9e6e46b4e3f9e8bd53e6d05de48544b0c57d4b0179e22c76d1199b",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "simple-git-hooks"
+    ]
   }
 }
